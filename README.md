@@ -27,7 +27,7 @@ To try a local checkout instead, run `claude --plugin-dir ./claude-code-al-synta
 ## How it works
 
 1. A `ui.render` hook on `AssistantMessage` looks for closed ```` ```al ```` fences. A reply without one is left to Claude Code untouched.
-2. Each AL block is sent to `highlighter/highlight.mjs`, run by `node` in a separate process (mods have no WebAssembly of their own). It parses the code with tree-sitter-al and answers with highlight captures.
+2. Each AL block is sent to `highlighter/highlight.mjs`, run by `node` in a separate process (mods have no WebAssembly of their own). It parses the code with tree-sitter-al and answers with highlight captures. The grammar only parses whole objects, so a snippet of bare statements or members is parsed again inside a stub object, and the cleanest parse wins.
 3. The mod colours the captures (a GitHub-dark palette) and draws the block in a frame. Results are cached per block, so a reply that redraws while it streams is parsed once per finished block.
 
 ## Using the highlighter elsewhere
