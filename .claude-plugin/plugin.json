@@ -1,0 +1,8 @@
+{
+  "name": "al-syntax",
+  "version": "0.1.0",
+  "description": "Tree-sitter syntax highlighting for AL (Business Central) code blocks in Claude's replies",
+  "author": { "name": "Artūras Bončkus" },
+  "repository": "https://github.com/abonckus/claude-code-al-syntax",
+  "license": "MIT"
+}
