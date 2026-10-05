@@ -30,3 +30,6 @@ jobs:
 
       - name: Test the release scripts
         run: node --test scripts/changelog.test.mjs
+
+      - name: Test the highlighter
+        run: node --test highlighter/highlight.test.mjs
