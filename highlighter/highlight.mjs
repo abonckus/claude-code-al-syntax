@@ -18,20 +18,25 @@ const query = new Query(lang, readFileSync(here('./grammar/highlights.scm'), 'ut
 const wrappers = [
   ['', ''],
   ['codeunit 0 _ {\n', '\n}'],
-  ['codeunit 0 _ {\nprocedure _()\nbegin\n', '\nend;\n}'],
+  // the empty statement closes a snippet that ends on a dangling `then` or `else`
+  ['codeunit 0 _ {\nprocedure _()\nbegin\n', '\n;\nend;\n}'],
   ['codeunit 0 _ {\n', '\nbegin\nend;\n}'],
 ]
-const errors = (node) => {
-  let n = node.type === 'ERROR' || node.isMissing ? 1 : 0
-  for (const child of node.children) n += errors(child)
-  return n
+// fewest characters inside ERROR nodes wins, then fewest error and missing nodes
+const errors = (node, acc = { chars: 0, nodes: 0 }) => {
+  if (node.type === 'ERROR' || node.isMissing) {
+    acc.chars += node.endIndex - node.startIndex
+    acc.nodes++
+  } else for (const child of node.children) errors(child, acc)
+  return acc
 }
+const worse = (a, b) => a.chars - b.chars || a.nodes - b.nodes
 let best
 for (const [pre, post] of wrappers) {
   const tree = parser.parse(pre + src + post)
   const parse = { tree, offset: pre.length, errors: errors(tree.rootNode) }
-  if (!best || parse.errors < best.errors) best = parse
-  if (parse.errors === 0) break
+  if (!best || worse(parse.errors, best.errors) < 0) best = parse
+  if (parse.errors.nodes === 0) break
 }
 
 // character index -> capture; later captures are more specific and win
