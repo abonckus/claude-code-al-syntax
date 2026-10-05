@@ -1,0 +1,12 @@
+{
+  "name": "al-syntax",
+  "description": "AL (Business Central) syntax highlighting for Claude Code",
+  "owner": { "name": "Artūras Bončkus" },
+  "plugins": [
+    {
+      "name": "al-syntax",
+      "source": "./",
+      "description": "Tree-sitter syntax highlighting for AL (Business Central) code blocks in Claude's replies"
+    }
+  ]
+}
