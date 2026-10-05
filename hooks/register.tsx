@@ -1,4 +1,4 @@
-import type { EngineInterface, Register } from 'claude-code'
+import type { EngineInterface, ProcessRunResult, Register } from 'claude-code'
 
 import { hasAl, split } from './fences'
 import { lines } from './theme'
@@ -12,13 +12,17 @@ const TREE_BUDGET = 80_000 // serialized characters of highlighted lines in one 
 const cache = new Map<string, Span[]>()
 let warned = false
 
-const highlight = async ($: EngineInterface, code: string): Promise<Span[] | { error: string }> => {
+const SCRIPT = 'highlighter/highlight.mjs'
+const RUN = { timeoutMs: 15_000 }
+
+// `run` starts the highlighter on `code`: each caller spells its own `$.process.run`.
+const highlight = async (code: string, run: () => Promise<ProcessRunResult>): Promise<Span[] | { error: string }> => {
   const hit = cache.get(code)
   if (hit) return hit
   try {
-    const run = await $.process.run(['node', `${$.plugin.root}/highlighter/highlight.mjs`], { stdin: code, timeoutMs: 15_000 })
-    if (run.exitCode !== 0) return { error: run.stderr.trim().split('\n').find(Boolean) ?? `exit ${run.exitCode}` }
-    const spans = JSON.parse(run.stdout) as Span[]
+    const ran = await run()
+    if (ran.exitCode !== 0) return { error: ran.stderr.trim().split('\n').find(Boolean) ?? `exit ${ran.exitCode}` }
+    const spans = JSON.parse(ran.stdout) as Span[]
     cache.set(code, spans)
     return spans
   } catch (err) {
@@ -36,7 +40,7 @@ export const register: Register = on => {
     let size = 0
 
     const block = async (code: string) => {
-      const spans = await highlight($, code)
+      const spans = await highlight(code, () => $.process.run(['node', `${$.plugin.root}/${SCRIPT}`], { ...RUN, stdin: code }))
       if (!Array.isArray(spans)) {
         if (!warned) {
           warned = true

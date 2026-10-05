@@ -26,6 +26,18 @@ To load it in every session, add the folder to `CLAUDE_CODE_PLUGIN_DIRS`.
 2. Each AL block is sent to `highlighter/highlight.mjs`, run by `node` in a separate process (mods have no WebAssembly of their own). It parses the code with tree-sitter-al and answers with highlight captures.
 3. The mod colours the captures (a GitHub-dark palette) and draws the block in a frame. Results are cached per block, so a reply that redraws while it streams is parsed once per finished block.
 
+## Using the highlighter elsewhere
+
+`highlighter/highlight.mjs` is a plain command, usable by any tool that can run one:
+
+```sh
+node highlighter/highlight.mjs < MyCodeunit.Codeunit.al
+```
+
+It reads AL source on stdin and writes one JSON array of `[text, capture]` spans to stdout, where `capture` is a tree-sitter highlight name (`keyword.control`, `function.definition`, `comment.line`…) or `null`. The spans join back into the input exactly. A non-zero exit means it could not highlight, with the reason on stderr.
+
+For example, a previewer that takes external highlighter commands can be pointed at it for the `al` language.
+
 ## Limitations
 
 - **Fenced blocks only.** Only ```` ```al ```` blocks are coloured, and only once their closing fence has arrived; while a block is still streaming it shows as plain text.
