@@ -2,6 +2,8 @@
 
 A [Claude Code](https://claude.com/claude-code) mod that highlights **AL** (Microsoft Dynamics 365 Business Central) code in Claude's replies, using the [tree-sitter-al](https://github.com/SShadowS/tree-sitter-al) grammar.
 
+![An AL table extension and page extension highlighted in a Claude Code reply](docs/screenshot.png)
+
 Claude Code's built-in highlighter has no AL grammar, and plugins cannot add one to it yet. So this mod redraws the replies that contain ```` ```al ```` blocks itself: the prose is drawn by Claude Code as usual, and each AL block is parsed by tree-sitter and coloured.
 
 ## Requirements
@@ -13,12 +15,14 @@ Everything else ships with the mod: the tree-sitter runtime (`web-tree-sitter`),
 
 ## Install
 
+The repository is its own marketplace:
+
 ```sh
-git clone https://github.com/abonckus/claude-code-al-syntax
-claude --plugin-dir ./claude-code-al-syntax
+claude plugin marketplace add abonckus/claude-code-al-syntax
+claude plugin install al-syntax@al-syntax
 ```
 
-To load it in every session, add the folder to `CLAUDE_CODE_PLUGIN_DIRS`.
+To try a local checkout instead, run `claude --plugin-dir ./claude-code-al-syntax`.
 
 ## How it works
 
