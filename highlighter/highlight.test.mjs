@@ -11,7 +11,8 @@ const snippets = {
   object: 'codeunit 1 X { }',
   statements: 'if not Confirm(Question, true) then exit;\nRec.Send();',
   member: 'trigger OnInsert()\nvar\n    Q: Record "Queue Entry";\nbegin\n    Q.FindLast();\nend;',
-  signature: 'internal procedure Drain(var TempEntry: Record "Queue Entry" temporary)',
+  dangling: '    if Rec.IsTemporary() then begin\n        Q.Reset();\n    end;\n    if Q.FindLast() then',
+  signature:'internal procedure Drain(var TempEntry: Record "Queue Entry" temporary)',
 }
 
 for (const [kind, src] of Object.entries(snippets)) {
@@ -26,6 +27,12 @@ test('statement fragments get keyword and call captures', () => {
   const spans = highlight(snippets.statements)
   assert.equal(captureOf(spans, 'if'), 'keyword.control')
   assert.equal(captureOf(spans, 'Confirm'), 'function.call')
+})
+
+test('a snippet ending on a dangling then is highlighted', () => {
+  const spans = highlight(snippets.dangling)
+  assert.equal(captureOf(spans, 'if'), 'keyword.control')
+  assert.equal(captureOf(spans, 'FindLast'), 'property')
 })
 
 test('a bare procedure signature is highlighted', () => {
